@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Tracker • Ghaziabad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #F4A82A;
+            --gold-light: #FFD97D;
+            --gold-glow: #FF8C00;
+            --sky-day: #4A90D9;
+            --sky-sunrise: #FF7E5F;
+            --sky-sunset: #FEB47B;
+            --sky-night: #0F1123;
+            --ground: #2D3436;
+            --text-light: #FFEFD5;
+            --text-dark: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background 2s ease;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Sky gradient - dynamically updated */
+        .sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            transition: background 3s ease;
+            overflow: visible;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 3s ease;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* Sun arc path */
+        .sun-path {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 80%;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-bottom: none;
+            border-radius: 50% 50% 0 0;
+            pointer-events: none;
+        }
+
+        /* The Sun */
+        .sun-container {
+            position: absolute;
+            bottom: 30%;
+            left: 5%;
+            width: 90%;
+            height: 60%;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .sun {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            transform: translate(-50%, 50%);
+            transition: left 0.5s ease, bottom 0.5s ease;
+            filter: drop-shadow(0 0 30px var(--gold)) drop-shadow(0 0 60px var(--gold-light));
+            z-index: 50;
+        }
+
+        .sun-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #FFF9E6, #FFD93D, #F4A82A);
+            box-shadow: 
+                0 0 20px var(--gold),
+                0 0 40px var(--gold-light),
+                inset 0 0 15px rgba(255, 255, 255, 0.5);
+            z-index: 2;
+        }
+
+        .sun-face {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            z-index: 3;
+        }
+
+        .sun-eye {
+            position: absolute;
+            top: 35%;
+            width: 5px;
+            height: 7px;
+            background: #D35400;
+            border-radius: 50%;
+        }
+
+        .sun-eye.left {
+            left: 30%;
+        }
+
+        .sun-eye.right {
+            right: 30%;
+        }
+
+        .sun-smile {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 9px;
+            border: 3px solid #D35400;
+            border-top: none;
+            border-radius: 0 0 18px 18px;
+        }
+
+        .sun-cheek {
+            position: absolute;
+            top: 48%;
+            width: 8px;
+            height: 5px;
+            background: rgba(255, 120, 100, 0.4);
+            border-radius: 50%;
+        }
+
+        .sun-cheek.left {
+            left: 15%;
+        }
+
+        .sun-cheek.right {
+            right: 15%;
+        }
+
+        /* Sun rays */
+        .sun-rays {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            animation: rotate-rays 30s linear infinite;
+        }
+
+        @keyframes rotate-rays {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to top, var(--gold), var(--gold-light), transparent);
+            border-radius: 2px;
+            transform-origin: center -5px;
+        }
+
+        .ray:nth-child(1) { transform: rotate(0deg) translateY(-30px); }
+        .ray:nth-child(2) { transform: rotate(30deg) translateY(-30px); }
+        .ray:nth-child(3) { transform: rotate(60deg) translateY(-30px); }
+        .ray:nth-child(4) { transform: rotate(90deg) translateY(-30px); }
+        .ray:nth-child(5) { transform: rotate(120deg) translateY(-30px); }
+        .ray:nth-child(6) { transform: rotate(150deg) translateY(-30px); }
+        .ray:nth-child(7) { transform: rotate(180deg) translateY(-30px); }
+        .ray:nth-child(8) { transform: rotate(210deg) translateY(-30px); }
+        .ray:nth-child(9) { transform: rotate(240deg) translateY(-30px); }
+        .ray:nth-child(10) { transform: rotate(270deg) translateY(-30px); }
+        .ray:nth-child(11) { transform: rotate(300deg) translateY(-30px); }
+        .ray:nth-child(12) { transform: rotate(330deg) translateY(-30px); }
+
+        /* Wavy rays */
+        .wavy-rays {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            animation: rotate-rays-reverse 45s linear infinite;
+        }
+
+        @keyframes rotate-rays-reverse {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(-360deg); }
+        }
+
+        .wavy-ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3px;
+            height: 15px;
+            background: linear-gradient(to top, var(--gold-light), rgba(255, 215, 0, 0.5), transparent);
+            border-radius: 2px;
+            transform-origin: center -8px;
+            animation: pulse-ray 2s ease-in-out infinite;
+        }
+
+        .wavy-ray:nth-child(1) { transform: rotate(15deg) translateY(-28px); animation-delay: 0s; }
+        .wavy-ray:nth-child(2) { transform: rotate(45deg) translateY(-28px); animation-delay: 0.2s; }
+        .wavy-ray:nth-child(3) { transform: rotate(75deg) translateY(-28px); animation-delay: 0.4s; }
+        .wavy-ray:nth-child(4) { transform: rotate(105deg) translateY(-28px); animation-delay: 0.6s; }
+        .wavy-ray:nth-child(5) { transform: rotate(135deg) translateY(-28px); animation-delay: 0.8s; }
+        .wavy-ray:nth-child(6) { transform: rotate(165deg) translateY(-28px); animation-delay: 1s; }
+        .wavy-ray:nth-child(7) { transform: rotate(195deg) translateY(-28px); animation-delay: 1.2s; }
+        .wavy-ray:nth-child(8) { transform: rotate(225deg) translateY(-28px); animation-delay: 1.4s; }
+        .wavy-ray:nth-child(9) { transform: rotate(255deg) translateY(-28px); animation-delay: 1.6s; }
+        .wavy-ray:nth-child(10) { transform: rotate(285deg) translateY(-28px); animation-delay: 1.8s; }
+        .wavy-ray:nth-child(11) { transform: rotate(315deg) translateY(-28px); animation-delay: 2s; }
+        .wavy-ray:nth-child(12) { transform: rotate(345deg) translateY(-28px); animation-delay: 2.2s; }
+
+        @keyframes pulse-ray {
+            0%, 100% { opacity: 0.6; height: 15px; }
+            50% { opacity: 1; height: 20px; }
+        }
+
+        /* Glow effect */
+        .sun-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.4), rgba(255, 200, 0, 0.2) 40%, transparent 70%);
+            animation: pulse-glow 4s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
+        }
+
+        .sun.below-horizon {
+            opacity: 0.3;
+            filter: blur(4px) drop-shadow(0 0 10px var(--gold));
+        }
+
+        .sun.below-horizon .sun-face {
+            display: none;
+        }
+
+        .sun.below-horizon .sun-rays,
+        .sun.below-horizon .wavy-rays {
+            animation-play-state: paused;
+        }
+
+        /* Horizon line */
+        .horizon {
+            position: absolute;
+            bottom: 30%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+        }
+
+        .horizon-label {
+            position: absolute;
+            bottom: 30%;
+            right: 5%;
+            transform: translateY(50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+        }
+
+        .direction-label {
+            position: absolute;
+            bottom: 30%;
+            transform: translateY(50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: rgba(255,255,255,0.7);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 60;
+        }
+
+        .direction-label.west {
+            left: 6%;
+        }
+
+        .direction-label.east {
+            right: 6%;
+        }
+
+        .direction-label.south {
+            left: 50%;
+            transform: translate(-50%, 50%);
+        }
+
+        /* Ground */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to bottom, #3D5A3D, #2D4A2D, #1D3A1D);
+        }
+
+        .ground::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+        }
+
+        /* City silhouette */
+        .city {
+            position: absolute;
+            bottom: 30%;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .building {
+            background: #1a1a2e;
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: var(--text-light);
+            z-index: 100;
+        }
+
+        .location {
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .location-search {
+            position: relative;
+            margin-bottom: 12px;
+            width: 280px;
+            display: inline-block;
+        }
+
+        .location-input {
+            width: 100%;
+            padding: 10px 60px 10px 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: var(--text-light);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .location-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .location-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(244, 168, 42, 0.3);
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(20, 20, 40, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-top: 5px;
+            display: none;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+
+        .suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(244, 168, 42, 0.3);
+        }
+
+        .suggestion-item .city-name {
+            font-weight: 600;
+        }
+
+        .suggestion-item .country-name {
+            opacity: 0.6;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
+        .current-location-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            font-size: 1rem;
+        }
+
+        .current-location-btn:hover {
+            opacity: 1;
+        }
+
+        .clear-location-btn {
+            position: absolute;
+            right: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 77, 77, 0.2);
+            border: none;
+            color: #ff4d4d;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 3px 6px;
+            line-height: 1;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-location-btn.visible {
+            opacity: 0.9;
+            visibility: visible;
+        }
+
+        .clear-location-btn:hover {
+            opacity: 1;
+            background: rgba(255, 77, 77, 0.4);
+        }
+
+        .current-time {
+            font-size: 4.5rem;
+            font-weight: 300;
+            letter-spacing: -2px;
+            line-height: 1;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.3);
+        }
+
+        .date {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Sun Stats Panel */
+        .stats-panel {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: var(--text-light);
+            text-align: right;
+            z-index: 100;
+        }
+
+        .stat-row {
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .stat-value.highlight {
+            color: var(--gold-light);
+        }
+
+        /* Bottom stats */
+        .bottom-panel {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 60px;
+            color: var(--text-light);
+            z-index: 100;
+        }
+
+        .bottom-stat {
+            text-align: center;
+        }
+
+        .bottom-stat .stat-label {
+            margin-bottom: 5px;
+        }
+
+        .bottom-stat .stat-value {
+            font-size: 1.4rem;
+        }
+
+        /* Daylight progress bar */
+        .daylight-bar {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            z-index: 100;
+        }
+
+        .daylight-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .daylight-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--sky-sunrise), var(--gold), var(--sky-sunset));
+            border-radius: 2px;
+            transition: width 1s ease;
+        }
+
+        .daylight-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        /* Phase indicator */
+        .phase-indicator {
+            position: absolute;
+            bottom: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            z-index: 100;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .info-panel {
+                top: 15px;
+                left: 15px;
+                right: 15px;
+            }
+
+            .location-search {
+                width: 220px;
+            }
+
+            .location-input {
+                font-size: 0.75rem;
+                padding: 8px 55px 8px 12px;
+            }
+
+            .suggestions {
+                max-width: 220px;
+            }
+
+            .current-time {
+                font-size: 2.8rem;
+            }
+
+            .date {
+                font-size: 1rem;
+            }
+
+            .stats-panel {
+                top: 15px;
+                right: 15px;
+            }
+
+            .stat-row {
+                margin-bottom: 10px;
+            }
+
+            .stat-label {
+                font-size: 0.55rem;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .bottom-panel {
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 0 10px;
+            }
+
+            .bottom-stat .stat-value {
+                font-size: 1.1rem;
+            }
+
+            .daylight-bar {
+                width: 85%;
+            }
+
+            .daylight-labels {
+                font-size: 0.6rem;
+            }
+
+            .phase-indicator {
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+            }
+
+            .direction-label {
+                font-size: 1rem;
+            }
+
+            .sun {
+                width: 70px;
+                height: 70px;
+            }
+
+            .sun-core {
+                width: 35px;
+                height: 35px;
+            }
+
+            .sun-face {
+                width: 35px;
+                height: 35px;
+            }
+
+            .sun-rays, .wavy-rays {
+                width: 70px;
+                height: 70px;
+            }
+
+            .ray {
+                width: 3px;
+                height: 14px;
+            }
+
+            .ray:nth-child(1) { transform: rotate(0deg) translateY(-22px); }
+            .ray:nth-child(2) { transform: rotate(30deg) translateY(-22px); }
+            .ray:nth-child(3) { transform: rotate(60deg) translateY(-22px); }
+            .ray:nth-child(4) { transform: rotate(90deg) translateY(-22px); }
+            .ray:nth-child(5) { transform: rotate(120deg) translateY(-22px); }
+            .ray:nth-child(6) { transform: rotate(150deg) translateY(-22px); }
+            .ray:nth-child(7) { transform: rotate(180deg) translateY(-22px); }
+            .ray:nth-child(8) { transform: rotate(210deg) translateY(-22px); }
+            .ray:nth-child(9) { transform: rotate(240deg) translateY(-22px); }
+            .ray:nth-child(10) { transform: rotate(270deg) translateY(-22px); }
+            .ray:nth-child(11) { transform: rotate(300deg) translateY(-22px); }
+            .ray:nth-child(12) { transform: rotate(330deg) translateY(-22px); }
+
+            .wavy-ray {
+                width: 2px;
+                height: 10px;
+            }
+
+            .wavy-ray:nth-child(1) { transform: rotate(15deg) translateY(-20px); }
+            .wavy-ray:nth-child(2) { transform: rotate(45deg) translateY(-20px); }
+            .wavy-ray:nth-child(3) { transform: rotate(75deg) translateY(-20px); }
+            .wavy-ray:nth-child(4) { transform: rotate(105deg) translateY(-20px); }
+            .wavy-ray:nth-child(5) { transform: rotate(135deg) translateY(-20px); }
+            .wavy-ray:nth-child(6) { transform: rotate(165deg) translateY(-20px); }
+            .wavy-ray:nth-child(7) { transform: rotate(195deg) translateY(-20px); }
+            .wavy-ray:nth-child(8) { transform: rotate(225deg) translateY(-20px); }
+            .wavy-ray:nth-child(9) { transform: rotate(255deg) translateY(-20px); }
+            .wavy-ray:nth-child(10) { transform: rotate(285deg) translateY(-20px); }
+            .wavy-ray:nth-child(11) { transform: rotate(315deg) translateY(-20px); }
+            .wavy-ray:nth-child(12) { transform: rotate(345deg) translateY(-20px); }
+
+            .sun-glow {
+                width: 60px;
+                height: 60px;
+            }
+
+            .sun-eye {
+                width: 4px;
+                height: 5px;
+            }
+
+            .sun-smile {
+                width: 12px;
+                height: 6px;
+                border-width: 2px;
+            }
+
+            .sun-cheek {
+                width: 6px;
+                height: 4px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .info-panel {
+                top: 10px;
+                left: 10px;
+            }
+
+            .location-search {
+                width: 180px;
+            }
+
+            .location-input {
+                font-size: 0.7rem;
+                padding: 6px 50px 6px 10px;
+            }
+
+            .suggestions {
+                max-width: 180px;
+            }
+
+            .clear-location-btn {
+                right: 28px;
+                width: 16px;
+                height: 16px;
+                font-size: 0.65rem;
+            }
+
+            .current-location-btn {
+                right: 6px;
+                font-size: 0.85rem;
+            }
+
+            .suggestion-item {
+                padding: 8px 10px;
+                font-size: 0.7rem;
+            }
+
+            .current-time {
+                font-size: 2.2rem;
+            }
+
+            .date {
+                font-size: 0.85rem;
+            }
+
+            .stats-panel {
+                top: 10px;
+                right: 10px;
+            }
+
+            .stat-label {
+                font-size: 0.5rem;
+                letter-spacing: 1px;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+
+            .stat-row {
+                margin-bottom: 8px;
+            }
+
+            .bottom-panel {
+                gap: 15px;
+                bottom: 4%;
+            }
+
+            .bottom-stat .stat-label {
+                font-size: 0.5rem;
+            }
+
+            .bottom-stat .stat-value {
+                font-size: 0.95rem;
+            }
+
+            .daylight-bar {
+                width: 90%;
+                bottom: 18%;
+            }
+
+            .daylight-labels {
+                font-size: 0.55rem;
+            }
+
+            .phase-indicator {
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+                bottom: 10%;
+            }
+
+            .direction-label {
+                font-size: 0.9rem;
+            }
+
+            .direction-label.west {
+                left: 3%;
+            }
+
+            .direction-label.east {
+                right: 3%;
+            }
+
+            .horizon-label {
+                font-size: 0.6rem;
+                right: 3%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sky" id="sky">
+            <div class="stars" id="stars"></div>
+            <div class="sun-path"></div>
+        </div>
+        
+        <div class="sun-container">
+            <div class="sun" id="sun">
+                <div class="sun-glow"></div>
+                <div class="sun-rays">
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                    <div class="ray"></div>
+                </div>
+                <div class="wavy-rays">
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                    <div class="wavy-ray"></div>
+                </div>
+                <div class="sun-core"></div>
+                <div class="sun-face">
+                    <div class="sun-eye left"></div>
+                    <div class="sun-eye right"></div>
+                    <div class="sun-cheek left"></div>
+                    <div class="sun-cheek right"></div>
+                    <div class="sun-smile"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="horizon"></div>
+        <div class="horizon-label">Horizon</div>
+        <div class="direction-label east">E</div>
+        <div class="direction-label west">W</div>
+        
+        <div class="city" id="city"></div>
+        
+        <div class="ground"></div>
+
+        <div class="info-panel">
+            <div class="location-search">
+                <input type="text" class="location-input" id="location-input" placeholder="Search location..." value="Ghaziabad, UP, India">
+                <button class="clear-location-btn visible" id="clear-location-btn" title="Clear">✕</button>
+                <button class="current-location-btn" id="current-location-btn" title="Use current location">📍</button>
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+            <div class="current-time" id="time">--:--</div>
+            <div class="date" id="date">--</div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-row">
+                <div class="stat-label">Sun Altitude</div>
+                <div class="stat-value highlight" id="altitude">--°</div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label">Azimuth</div>
+                <div class="stat-value" id="azimuth">--°</div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label">Solar Noon</div>
+                <div class="stat-value" id="solar-noon">--:--</div>
+            </div>
+        </div>
+
+        <div class="daylight-bar">
+            <div class="daylight-track">
+                <div class="daylight-progress" id="daylight-progress"></div>
+            </div>
+            <div class="daylight-labels">
+                <span id="sunrise-time">Sunrise: --:--</span>
+                <span id="sunset-time">Sunset: --:--</span>
+            </div>
+        </div>
+
+        <div class="phase-indicator" id="phase">Loading...</div>
+
+        <div class="bottom-panel">
+            <div class="bottom-stat">
+                <div class="stat-label">Daylight Left</div>
+                <div class="stat-value" id="daylight-left">--:--</div>
+            </div>
+            <div class="bottom-stat">
+                <div class="stat-label">Total Daylight</div>
+                <div class="stat-value" id="total-daylight">--:--</div>
+            </div>
+            <div class="bottom-stat">
+                <div class="stat-label">UV Index Est.</div>
+                <div class="stat-value" id="uv-index">--</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current location coordinates (default: Ghaziabad)
+        let LAT = 28.6692;
+        let LNG = 77.4538;
+        let currentLocationName = "Ghaziabad, UP, India";
+
+        // City database for suggestions
+        const cities = [
+            { name: "Ghaziabad", region: "UP", country: "India", lat: 28.6692, lng: 77.4538 },
+            { name: "New Delhi", region: "Delhi", country: "India", lat: 28.6139, lng: 77.2090 },
+            { name: "Mumbai", region: "Maharashtra", country: "India", lat: 19.0760, lng: 72.8777 },
+            { name: "Bangalore", region: "Karnataka", country: "India", lat: 12.9716, lng: 77.5946 },
+            { name: "Chennai", region: "Tamil Nadu", country: "India", lat: 13.0827, lng: 80.2707 },
+            { name: "Kolkata", region: "West Bengal", country: "India", lat: 22.5726, lng: 88.3639 },
+            { name: "Hyderabad", region: "Telangana", country: "India", lat: 17.3850, lng: 78.4867 },
+            { name: "Pune", region: "Maharashtra", country: "India", lat: 18.5204, lng: 73.8567 },
+            { name: "Ahmedabad", region: "Gujarat", country: "India", lat: 23.0225, lng: 72.5714 },
+            { name: "Jaipur", region: "Rajasthan", country: "India", lat: 26.9124, lng: 75.7873 },
+            { name: "Lucknow", region: "UP", country: "India", lat: 26.8467, lng: 80.9462 },
+            { name: "Kanpur", region: "UP", country: "India", lat: 26.4499, lng: 80.3319 },
+            { name: "Noida", region: "UP", country: "India", lat: 28.5355, lng: 77.3910 },
+            { name: "Gurugram", region: "Haryana", country: "India", lat: 28.4595, lng: 77.0266 },
+            { name: "Chandigarh", region: "Punjab", country: "India", lat: 30.7333, lng: 76.7794 },
+            { name: "Varanasi", region: "UP", country: "India", lat: 25.3176, lng: 82.9739 },
+            { name: "Agra", region: "UP", country: "India", lat: 27.1767, lng: 78.0081 },
+            { name: "Surat", region: "Gujarat", country: "India", lat: 21.1702, lng: 72.8311 },
+            { name: "Indore", region: "MP", country: "India", lat: 22.7196, lng: 75.8577 },
+            { name: "Bhopal", region: "MP", country: "India", lat: 23.2599, lng: 77.4126 },
+            { name: "Nagpur", region: "Maharashtra", country: "India", lat: 21.1458, lng: 79.0882 },
+            { name: "Coimbatore", region: "Tamil Nadu", country: "India", lat: 11.0168, lng: 76.9558 },
+            { name: "Kochi", region: "Kerala", country: "India", lat: 9.9312, lng: 76.2673 },
+            { name: "Thiruvananthapuram", region: "Kerala", country: "India", lat: 8.5241, lng: 76.9366 },
+            { name: "Visakhapatnam", region: "AP", country: "India", lat: 17.6868, lng: 83.2185 },
+            { name: "Patna", region: "Bihar", country: "India", lat: 25.5941, lng: 85.1376 },
+            { name: "Ranchi", region: "Jharkhand", country: "India", lat: 23.3441, lng: 85.3096 },
+            { name: "Guwahati", region: "Assam", country: "India", lat: 26.1445, lng: 91.7362 },
+            { name: "Shimla", region: "HP", country: "India", lat: 31.1048, lng: 77.1734 },
+            { name: "Dehradun", region: "Uttarakhand", country: "India", lat: 30.3165, lng: 78.0322 },
+            { name: "Amritsar", region: "Punjab", country: "India", lat: 31.6340, lng: 74.8723 },
+            { name: "Srinagar", region: "J&K", country: "India", lat: 34.0837, lng: 74.7973 },
+            { name: "Leh", region: "Ladakh", country: "India", lat: 34.1526, lng: 77.5771 },
+            { name: "New York", region: "NY", country: "USA", lat: 40.7128, lng: -74.0060 },
+            { name: "Los Angeles", region: "CA", country: "USA", lat: 34.0522, lng: -118.2437 },
+            { name: "Chicago", region: "IL", country: "USA", lat: 41.8781, lng: -87.6298 },
+            { name: "San Francisco", region: "CA", country: "USA", lat: 37.7749, lng: -122.4194 },
+            { name: "Seattle", region: "WA", country: "USA", lat: 47.6062, lng: -122.3321 },
+            { name: "Miami", region: "FL", country: "USA", lat: 25.7617, lng: -80.1918 },
+            { name: "London", region: "England", country: "UK", lat: 51.5074, lng: -0.1278 },
+            { name: "Paris", region: "Île-de-France", country: "France", lat: 48.8566, lng: 2.3522 },
+            { name: "Berlin", region: "Berlin", country: "Germany", lat: 52.5200, lng: 13.4050 },
+            { name: "Tokyo", region: "Kanto", country: "Japan", lat: 35.6762, lng: 139.6503 },
+            { name: "Sydney", region: "NSW", country: "Australia", lat: -33.8688, lng: 151.2093 },
+            { name: "Melbourne", region: "Victoria", country: "Australia", lat: -37.8136, lng: 144.9631 },
+            { name: "Singapore", region: "", country: "Singapore", lat: 1.3521, lng: 103.8198 },
+            { name: "Dubai", region: "", country: "UAE", lat: 25.2048, lng: 55.2708 },
+            { name: "Hong Kong", region: "", country: "China", lat: 22.3193, lng: 114.1694 },
+            { name: "Shanghai", region: "", country: "China", lat: 31.2304, lng: 121.4737 },
+            { name: "Beijing", region: "", country: "China", lat: 39.9042, lng: 116.4074 },
+            { name: "Toronto", region: "Ontario", country: "Canada", lat: 43.6532, lng: -79.3832 },
+            { name: "Vancouver", region: "BC", country: "Canada", lat: 49.2827, lng: -123.1207 },
+            { name: "Moscow", region: "", country: "Russia", lat: 55.7558, lng: 37.6173 },
+            { name: "Cape Town", region: "", country: "South Africa", lat: -33.9249, lng: 18.4241 },
+            { name: "Cairo", region: "", country: "Egypt", lat: 30.0444, lng: 31.2357 },
+            { name: "Rio de Janeiro", region: "", country: "Brazil", lat: -22.9068, lng: -43.1729 },
+            { name: "São Paulo", region: "", country: "Brazil", lat: -23.5505, lng: -46.6333 },
+            { name: "Bangkok", region: "", country: "Thailand", lat: 13.7563, lng: 100.5018 },
+            { name: "Seoul", region: "", country: "South Korea", lat: 37.5665, lng: 126.9780 },
+            { name: "Amsterdam", region: "", country: "Netherlands", lat: 52.3676, lng: 4.9041 },
+            { name: "Rome", region: "", country: "Italy", lat: 41.9028, lng: 12.4964 },
+            { name: "Madrid", region: "", country: "Spain", lat: 40.4168, lng: -3.7038 },
+            { name: "Barcelona", region: "", country: "Spain", lat: 41.3851, lng: 2.1734 },
+            { name: "Istanbul", region: "", country: "Turkey", lat: 41.0082, lng: 28.9784 },
+            { name: "Athens", region: "", country: "Greece", lat: 37.9838, lng: 23.7275 },
+            { name: "Vienna", region: "", country: "Austria", lat: 48.2082, lng: 16.3738 },
+            { name: "Zurich", region: "", country: "Switzerland", lat: 47.3769, lng: 8.5417 },
+            { name: "Stockholm", region: "", country: "Sweden", lat: 59.3293, lng: 18.0686 },
+            { name: "Oslo", region: "", country: "Norway", lat: 59.9139, lng: 10.7522 },
+            { name: "Helsinki", region: "", country: "Finland", lat: 60.1699, lng: 24.9384 },
+            { name: "Reykjavik", region: "", country: "Iceland", lat: 64.1466, lng: -21.9426 },
+        ];
+
+        // Location search functionality
+        const locationInput = document.getElementById('location-input');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const currentLocationBtn = document.getElementById('current-location-btn');
+        const clearLocationBtn = document.getElementById('clear-location-btn');
+
+        // Show/hide clear button based on input
+        function updateClearButton() {
+            if (locationInput.value.length > 0) {
+                clearLocationBtn.classList.add('visible');
+            } else {
+                clearLocationBtn.classList.remove('visible');
+            }
+        }
+
+        clearLocationBtn.addEventListener('click', function() {
+            locationInput.value = '';
+            updateClearButton();
+            locationInput.focus();
+            suggestionsDiv.classList.remove('active');
+        });
+
+        locationInput.addEventListener('input', function() {
+            updateClearButton();
+            
+            const query = this.value.toLowerCase().trim();
+            if (query.length < 2) {
+                suggestionsDiv.classList.remove('active');
+                return;
+            }
+
+            const matches = cities.filter(city => 
+                city.name.toLowerCase().includes(query) ||
+                city.region.toLowerCase().includes(query) ||
+                city.country.toLowerCase().includes(query)
+            ).slice(0, 8);
+
+            if (matches.length > 0) {
+                suggestionsDiv.innerHTML = matches.map(city => `
+                    <div class="suggestion-item" data-lat="${city.lat}" data-lng="${city.lng}" data-name="${city.name}, ${city.region}${city.region ? ', ' : ''}${city.country}">
+                        <span class="city-name">${city.name}</span>
+                        <span class="country-name">${city.region}${city.region ? ', ' : ''}${city.country}</span>
+                    </div>
+                `).join('');
+                suggestionsDiv.classList.add('active');
+            } else {
+                suggestionsDiv.classList.remove('active');
+            }
+        });
+
+        suggestionsDiv.addEventListener('click', function(e) {
+            const item = e.target.closest('.suggestion-item');
+            if (item) {
+                LAT = parseFloat(item.dataset.lat);
+                LNG = parseFloat(item.dataset.lng);
+                currentLocationName = item.dataset.name;
+                locationInput.value = currentLocationName;
+                suggestionsDiv.classList.remove('active');
+                updateClearButton();
+                update();
+            }
+        });
+
+        locationInput.addEventListener('focus', function() {
+            if (this.value.length >= 2) {
+                this.dispatchEvent(new Event('input'));
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.location-search')) {
+                suggestionsDiv.classList.remove('active');
+            }
+        });
+
+        currentLocationBtn.addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        LAT = position.coords.latitude;
+                        LNG = position.coords.longitude;
+                        locationInput.value = `${LAT.toFixed(4)}°N, ${LNG.toFixed(4)}°E`;
+                        currentLocationName = locationInput.value;
+                        updateClearButton();
+                        update();
+                    },
+                    (error) => {
+                        alert('Unable to get your location. Please search manually.');
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
+        });
+
+        // Generate stars
+        function generateStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Generate city silhouette
+        function generateCity() {
+            const cityContainer = document.getElementById('city');
+            const buildings = [30, 50, 35, 70, 45, 80, 40, 55, 90, 45, 60, 35, 75, 50, 40, 65, 45, 85, 55, 40];
+            buildings.forEach(height => {
+                const building = document.createElement('div');
+                building.className = 'building';
+                building.style.width = (Math.random() * 15 + 10) + 'px';
+                building.style.height = height + 'px';
+                cityContainer.appendChild(building);
+            });
+        }
+
+        // Solar calculations
+        function toRadians(deg) { return deg * Math.PI / 180; }
+        function toDegrees(rad) { return rad * 180 / Math.PI; }
+
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function getSolarDeclination(dayOfYear) {
+            return 23.45 * Math.sin(toRadians(360 / 365 * (dayOfYear - 81)));
+        }
+
+        function getEquationOfTime(dayOfYear) {
+            const B = toRadians(360 / 365 * (dayOfYear - 81));
+            return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+        }
+
+        function getSunPosition(date, lat, lng) {
+            const dayOfYear = getDayOfYear(date);
+            const declination = getSolarDeclination(dayOfYear);
+            const eot = getEquationOfTime(dayOfYear);
+            
+            // Local time in hours
+            const localTime = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+            
+            // Time zone offset (IST = +5:30)
+            const tzOffset = 5.5;
+            
+            // Solar time
+            const lstm = 15 * tzOffset; // Local Standard Time Meridian
+            const tc = 4 * (lng - lstm) + eot; // Time Correction Factor
+            const lst = localTime + tc / 60; // Local Solar Time
+            
+            // Hour angle
+            const hourAngle = 15 * (lst - 12);
+            
+            // Solar altitude
+            const latRad = toRadians(lat);
+            const declRad = toRadians(declination);
+            const haRad = toRadians(hourAngle);
+            
+            const altitude = toDegrees(Math.asin(
+                Math.sin(latRad) * Math.sin(declRad) + 
+                Math.cos(latRad) * Math.cos(declRad) * Math.cos(haRad)
+            ));
+            
+            // Solar azimuth
+            const azimuth = toDegrees(Math.atan2(
+                -Math.sin(haRad),
+                Math.tan(declRad) * Math.cos(latRad) - Math.sin(latRad) * Math.cos(haRad)
+            )) + 180;
+            
+            return { altitude, azimuth, declination, hourAngle };
+        }
+
+        function getSunriseSunset(date, lat, lng) {
+            const dayOfYear = getDayOfYear(date);
+            const declination = getSolarDeclination(dayOfYear);
+            const eot = getEquationOfTime(dayOfYear);
+            
+            const latRad = toRadians(lat);
+            const declRad = toRadians(declination);
+            
+            // Hour angle at sunrise/sunset (when altitude = -0.833 degrees for atmospheric refraction)
+            const cosHa = (Math.sin(toRadians(-0.833)) - Math.sin(latRad) * Math.sin(declRad)) / 
+                         (Math.cos(latRad) * Math.cos(declRad));
+            
+            if (cosHa < -1 || cosHa > 1) {
+                // Polar day or polar night
+                return { sunrise: null, sunset: null, solarNoon: 12 };
+            }
+            
+            const haRise = toDegrees(Math.acos(cosHa));
+            
+            // Time zone and longitude correction
+            const tzOffset = 5.5;
+            const lstm = 15 * tzOffset;
+            const tc = 4 * (lng - lstm) + eot;
+            
+            const solarNoon = 12 - tc / 60;
+            const sunrise = solarNoon - haRise / 15;
+            const sunset = solarNoon + haRise / 15;
+            
+            return { sunrise, sunset, solarNoon };
+        }
+
+        function formatTime(hours) {
+            const h = Math.floor(hours);
+            const m = Math.floor((hours - h) * 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        }
+
+        function formatDuration(hours) {
+            if (hours < 0) return '--:--';
+            const h = Math.floor(hours);
+            const m = Math.floor((hours - h) * 60);
+            return `${h}h ${m}m`;
+        }
+
+        function getPhase(altitude, currentHour, sunrise, sunset) {
+            if (altitude < -18) return 'Night';
+            if (altitude < -12) return 'Astronomical Twilight';
+            if (altitude < -6) return 'Nautical Twilight';
+            if (altitude < 0) return 'Civil Twilight';
+            if (currentHour < sunrise + 1) return 'Golden Hour (Sunrise)';
+            if (currentHour > sunset - 1) return 'Golden Hour (Sunset)';
+            if (altitude > 60) return 'High Sun';
+            return 'Daytime';
+        }
+
+        function estimateUV(altitude) {
+            if (altitude <= 0) return 0;
+            // Simplified UV estimation based on solar altitude
+            const uvMax = 11;
+            const uv = uvMax * Math.sin(toRadians(altitude)) * 0.9;
+            return Math.max(0, Math.min(11, Math.round(uv)));
+        }
+
+        function updateSkyColor(altitude, currentHour, sunrise, sunset) {
+            const sky = document.getElementById('sky');
+            const stars = document.getElementById('stars');
+            let gradient;
+            
+            if (altitude < -18) {
+                // Night
+                gradient = 'linear-gradient(to bottom, #0a0a1a, #1a1a3a, #0f1123)';
+                stars.style.opacity = '1';
+            } else if (altitude < -6) {
+                // Twilight
+                const t = (altitude + 18) / 12;
+                gradient = `linear-gradient(to bottom, 
+                    rgb(${Math.round(10 + t * 40)}, ${Math.round(10 + t * 30)}, ${Math.round(30 + t * 50)}), 
+                    rgb(${Math.round(30 + t * 80)}, ${Math.round(30 + t * 50)}, ${Math.round(60 + t * 60)}),
+                    rgb(${Math.round(20 + t * 100)}, ${Math.round(40 + t * 60)}, ${Math.round(80 + t * 40)}))`;
+                stars.style.opacity = String(1 - t);
+            } else if (altitude < 0) {
+                // Civil twilight - golden hour colors
+                const nearSunrise = currentHour < (sunrise + sunset) / 2;
+                if (nearSunrise) {
+                    gradient = 'linear-gradient(to bottom, #2d1b4e, #ff6b6b, #ffd93d)';
+                } else {
+                    gradient = 'linear-gradient(to bottom, #1a1a4a, #ff7e5f, #feb47b)';
+                }
+                stars.style.opacity = '0';
+            } else if (altitude < 15) {
+                // Low sun - golden tones
+                const nearSunrise = currentHour < (sunrise + sunset) / 2;
+                if (nearSunrise) {
+                    gradient = 'linear-gradient(to bottom, #667eea, #86a8e7, #ffcf7a)';
+                } else {
+                    gradient = 'linear-gradient(to bottom, #4a5a8a, #7eb0d5, #feb47b)';
+                }
+                stars.style.opacity = '0';
+            } else if (altitude < 40) {
+                // Mid-morning/afternoon
+                gradient = 'linear-gradient(to bottom, #4a90d9, #87ceeb, #b0e0e6)';
+                stars.style.opacity = '0';
+            } else {
+                // High sun - bright blue
+                gradient = 'linear-gradient(to bottom, #1e88e5, #42a5f5, #81d4fa)';
+                stars.style.opacity = '0';
+            }
+            
+            sky.style.background = gradient;
+        }
+
+        function updateSunPosition(altitude, azimuth) {
+            const sun = document.getElementById('sun');
+            const container = document.querySelector('.sun-container');
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            
+            // Map azimuth to x position (East to West)
+            // In Northern Hemisphere winter: sun rises SE, peaks S, sets SW
+            // Azimuth ~120° at sunrise, ~180° at noon, ~240° at sunset
+            // E is on right, W is on left
+            // Morning (azimuth < 180): sun on right side
+            // Afternoon (azimuth > 180): sun on left side
+            let normalizedAzimuth = (azimuth - 90) / 180;
+            normalizedAzimuth = Math.max(0, Math.min(1, normalizedAzimuth));
+            const x = normalizedAzimuth * containerWidth; // 0 = right (E), 1 = left (W)
+            
+            // Map altitude to y position
+            // In Ghaziabad (28.67°N) on Dec 23, max altitude is ~38-40°
+            // Scale so that max realistic altitude fills most of the container
+            const maxExpectedAltitude = 45; // Max sun altitude for this location/season
+            const normalizedAltitude = Math.max(0, altitude) / maxExpectedAltitude;
+            const y = Math.min(1, normalizedAltitude) * containerHeight;
+            
+            sun.style.left = x + 'px';
+            sun.style.bottom = y + 'px';
+            
+            // Debug info (can be removed)
+            console.log(`Altitude: ${altitude.toFixed(1)}°, Azimuth: ${azimuth.toFixed(1)}°, X: ${(normalizedAzimuth*100).toFixed(0)}%, Y: ${(y/containerHeight*100).toFixed(0)}%`);
+            
+            // Adjust sun appearance based on altitude
+            if (altitude < 0) {
+                sun.classList.add('below-horizon');
+                sun.style.bottom = '-50px';
+                sun.style.opacity = '0.3';
+            } else {
+                sun.classList.remove('below-horizon');
+                sun.style.opacity = '1';
+            }
+            
+            // Color shift for low sun - update the sun core gradient
+            const sunCore = sun.querySelector('.sun-core');
+            const rays = sun.querySelectorAll('.ray');
+            const wavyRays = sun.querySelectorAll('.wavy-ray');
+            
+            if (sunCore) {
+                if (altitude < 15 && altitude > -10) {
+                    // Warmer orange/red tones during golden hour
+                    sunCore.style.background = 'radial-gradient(circle at 35% 35%, #FFF0D0, #FF8C00, #FF4500)';
+                    rays.forEach(ray => {
+                        ray.style.background = 'linear-gradient(to top, #FF4500, #FF8C00, transparent)';
+                    });
+                    wavyRays.forEach(ray => {
+                        ray.style.background = 'linear-gradient(to top, #FF8C00, rgba(255, 100, 50, 0.5), transparent)';
+                    });
+                } else {
+                    // Normal bright yellow
+                    sunCore.style.background = 'radial-gradient(circle at 35% 35%, #FFF9E6, #FFD93D, #F4A82A)';
+                    rays.forEach(ray => {
+                        ray.style.background = 'linear-gradient(to top, #F4A82A, #FFD97D, transparent)';
+                    });
+                    wavyRays.forEach(ray => {
+                        ray.style.background = 'linear-gradient(to top, #FFD97D, rgba(255, 215, 0, 0.5), transparent)';
+                    });
+                }
+            }
+        }
+
+        function update() {
+            const now = new Date();
+            
+            // Update time display
+            document.getElementById('time').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            
+            // Get sun position
+            const { altitude, azimuth } = getSunPosition(now, LAT, LNG);
+            const { sunrise, sunset, solarNoon } = getSunriseSunset(now, LAT, LNG);
+            
+            const currentHour = now.getHours() + now.getMinutes() / 60;
+            
+            // Update stats
+            document.getElementById('altitude').textContent = altitude.toFixed(1) + '°';
+            document.getElementById('azimuth').textContent = azimuth.toFixed(1) + '°';
+            document.getElementById('solar-noon').textContent = formatTime(solarNoon);
+            document.getElementById('sunrise-time').textContent = 'Sunrise: ' + formatTime(sunrise);
+            document.getElementById('sunset-time').textContent = 'Sunset: ' + formatTime(sunset);
+            
+            // Daylight calculations
+            const totalDaylight = sunset - sunrise;
+            const daylightElapsed = Math.max(0, Math.min(totalDaylight, currentHour - sunrise));
+            const daylightRemaining = Math.max(0, sunset - currentHour);
+            
+            document.getElementById('total-daylight').textContent = formatDuration(totalDaylight);
+            document.getElementById('daylight-left').textContent = altitude > 0 ? formatDuration(daylightRemaining) : '--:--';
+            
+            // Progress bar
+            const progress = (daylightElapsed / totalDaylight) * 100;
+            document.getElementById('daylight-progress').style.width = Math.max(0, Math.min(100, progress)) + '%';
+            
+            // Phase
+            const phase = getPhase(altitude, currentHour, sunrise, sunset);
+            document.getElementById('phase').textContent = phase;
+            
+            // UV Index
+            document.getElementById('uv-index').textContent = estimateUV(altitude);
+            
+            // Update visuals
+            updateSkyColor(altitude, currentHour, sunrise, sunset);
+            updateSunPosition(altitude, azimuth);
+        }
+
+        // Initialize
+        generateStars();
+        generateCity();
+        update();
+        
+        // Update every second
+        setInterval(update, 1000);
+    </script>
+</body>
+</html>
